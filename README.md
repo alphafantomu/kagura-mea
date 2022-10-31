@@ -2,26 +2,45 @@
 A lightweight async function binder, named after only the most loved virtual youtuber, Kagura Mea.
 
 # Installation
-Luvit and lit need to be installed in your system, to install kagura-mea please run the following command:
+lit needs to be installed in your system, to install kagura-mea please run the following command:
 ```bash
 lit install alphafantomu/kagura-mea
 ```
 
 # Usage
-The library returns a function which will be used to bind to synchronous functions, like so:
+The library returns a function which will be used to wrap synchronous functions, an example using coroutines is shown below:
+
 ```lua
-local async = require('kagura-mea');
+local async = require('kagura-mea').async;
 
-local fx = async(function(n)
-	return n * 5;
+local waitFive = async(function(n)
+	local uv = require('uv');
+	local t = uv.thread_self();
+	uv.sleep(5000);
+	return nil, n * n, n;
 end);
 
-print(fx());
+coroutine.wrap(function()
+	local thread = coroutine.running();
+	waitFive(5, function(...)
+		print(...);
+		coroutine.resume(thread);
+	end)
+	print'got here';
+	coroutine.yield();
+	print'woohoo';
+end)();
 
-fx(function(err, n)
-	assert(not err, err);
-	print(n);
-end);
+coroutine.wrap(function()
+	local thread = coroutine.running();
+	waitFive(5, function(...)
+		print(...);
+		coroutine.resume(thread);
+	end)
+	print'got here';
+	coroutine.yield();
+	print'woohoo';
+end)();
 ```
 
 # Kagura Mea
@@ -33,7 +52,7 @@ You can find her socials here:
 - [Her Tip](https://streamlabs.com/kaguramea0x0/tip)
 
 # Disclaimer
-There are no affiliations with Kagura Mea involved.
+There is no affiliation with Kagura Mea.
 
 # License
 [MIT License](/LICENSE)
